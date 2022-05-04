@@ -116,7 +116,7 @@ export async function fetchData ():
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/zones`).then(res => res.json()),
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/stages`).then(res => res.json()),
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/result/matrix`).then(res => res.json()),
-    fetch(`https://penguin-stats.io/PenguinStats/api/v2/formula`).then(res => res.json()),
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/formula`).then(res => res.json()),
   ])
   return { rawItems, rawZones, rawStages, rawMatrix, rawFormula }
 }
