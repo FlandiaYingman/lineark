@@ -37,6 +37,16 @@ export function solve (needs: Map<string, number>, haves: Map<string, number>, d
     variables[stageID] = variable
     ints[stageID] = 1
   }
+  for (const [outcomeItemID, synthesize] of Object.entries(data.synthesizes)) {
+    const variable = { 'cost': synthesize.cost }
+    // negative for consumed items
+    synthesize.materials.forEach(material => {variable[material.item.id] = -material.count})
+    // positive for produced items
+    variable[outcomeItemID] = +1
+
+    variables[outcomeItemID] = variable
+    ints[outcomeItemID] = 1
+  }
 
   const constraints = {
     'depot_count': { 'equal': 1 },
