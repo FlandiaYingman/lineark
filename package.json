@@ -1,0 +1,12 @@
+{
+  "name": "lineark",
+  "version": "1.0.0",
+  "description": "Lineark is a tool for solving linear programming problems of the game Arknights.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
