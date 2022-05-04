@@ -67,29 +67,67 @@ export class Drop {
   sampleCount: number
 }
 
-export type RawData = { rawItems: any, rawZones: any, rawStages: any, rawMatrix: any }
-export type Data = { items: Map<string, Item>, zones: Map<string, Zone>, stages: Map<string, Stage>, drops: Map<string, Drop[]> }
+export class Synthesize {
+
+  constructor (rawSynthesize: any, itemMap: Map<string, Item>) {
+    this.outcome = itemMap[rawSynthesize.id]
+    this.extraOutcome = rawSynthesize.extraOutcome.map(raw =>
+      ({ item: itemMap[raw.id], probability: raw.weight / rawSynthesize.totalWeight })
+    )
+    // multiply (36 / 10000) as the CE-6 sanity-gold coefficient
+    // multiply (0.5), since the infra produces gold. we take 0.5 as an approximation as the infra-CE-6 coefficient
+    // multiply (4 / 7), since only 4 / 7 of the days that CE-6 is open
+    this.cost = rawSynthesize.goldCost * (36 / 10000) * (0.5) * (4 / 7)
+    this.goldCost = rawSynthesize.goldCost
+    this.materials = rawSynthesize.costs.map(raw =>
+      ({ item: itemMap[raw.id], count: raw.count })
+    )
+  }
+
+  outcome: Item
+  extraOutcome: { item: Item, probability: number }[]
+
+  cost: number
+  goldCost: number
+
+  materials: { item: Item, count: number }[]
+}
+
+export type RawData = {
+  rawItems: any,
+  rawZones: any,
+  rawStages: any,
+  rawMatrix: any,
+  rawFormula: any,
+}
+export type Data = {
+  items: Map<string, Item>,
+  zones: Map<string, Zone>,
+  stages: Map<string, Stage>,
+  drops: Map<string, Drop[]>,
+  synthesizes: Map<string, Synthesize>,
+}
 
 // fetches the data from the Penguin Stats API. returning the raw data as-is from the API.
 export async function fetchData ():
   Promise<RawData> {
-  const [rawItems, rawZones, rawStages, rawMatrix] = await Promise.all([
+  const [rawItems, rawZones, rawStages, rawMatrix, rawFormula] = await Promise.all([
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/items`).then(res => res.json()),
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/zones`).then(res => res.json()),
     fetch(`https://penguin-stats.cn/PenguinStats/api/v2/stages`).then(res => res.json()),
-    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/result/matrix`).then(res => res.json())
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/result/matrix`).then(res => res.json()),
+    fetch(`https://penguin-stats.io/PenguinStats/api/v2/formula`).then(res => res.json()),
   ])
-  return { rawItems, rawZones, rawStages, rawMatrix }
+  return { rawItems, rawZones, rawStages, rawMatrix, rawFormula }
 }
 
 // loads the raw data from the Penguin Stats API and returns the processed data map.
-export function loadData ({ rawItems, rawZones, rawStages, rawMatrix }: RawData):
+export function loadData ({ rawItems, rawZones, rawStages, rawMatrix, rawFormula }: RawData):
   Data {
   const items = _.keyBy(rawItems.map(raw => Object.freeze(new Item(raw))), 'id')
   const zones = _.keyBy(rawZones.map(raw => Object.freeze(new Zone(raw))), 'id')
   const stages = _.keyBy(rawStages.map(raw => Object.freeze(new Stage(raw, zones))), 'id')
   const drops = _.groupBy(rawMatrix['matrix'].map(raw => Object.freeze(new Drop(raw, items, stages))), 'stage.id')
-  return {
-    items, zones, stages, drops
-  }
+  const synthesizes = _.keyBy(rawFormula.map(raw => Object.freeze(new Synthesize(raw, items))), 'outcome.id')
+  return { items, zones, stages, drops, synthesizes }
 }
