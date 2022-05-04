@@ -7,7 +7,7 @@ type Language = 'zh' | 'ja' | 'en' | 'ko'
 // I18N string
 type I18N = Map<Language, string>
 
-class Item {
+export class Item {
   // rawItem is the raw item from the Penguin Stats API
   constructor (rawItem: any) {
     this.names = rawItem.name_i18n
@@ -18,7 +18,7 @@ class Item {
   id: string
 }
 
-class Zone {
+export class Zone {
   // rawZone is the raw zone from the Penguin Stats API
   constructor (rawZone: any) {
     this.names = rawZone.zoneName_i18n
@@ -33,7 +33,7 @@ class Zone {
   existence: Map<Server, { exists: boolean, openTime: Date, closeTime: Date }>
 }
 
-class Stage {
+export class Stage {
   // rawStage is the raw stage from the Penguin Stats API
   // Note that after construction, estimatedDrops shall be filled manually.
   constructor (rawStage: any, zoneMap: Map<string, Zone>) {
@@ -51,7 +51,7 @@ class Stage {
   cost: number
 }
 
-class Drop {
+export class Drop {
   // rawMatrix is the raw drop matrix from the Penguin Stats API
   constructor (rawMatrix: any, itemMap: Map<string, Item>, stageMap: Map<string, Stage>) {
     this.item = itemMap[rawMatrix.itemId]
@@ -67,9 +67,12 @@ class Drop {
   sampleCount: number
 }
 
+export type RawData = { rawItems: any, rawZones: any, rawStages: any, rawMatrix: any }
+export type Data = { items: Map<string, Item>, zones: Map<string, Zone>, stages: Map<string, Stage>, drops: Map<string, Drop[]> }
+
 // fetches the data from the Penguin Stats API. returning the raw data as-is from the API.
-async function fetchData ():
-  Promise<{ rawItems, rawZones, rawStages, rawMatrix }> {
+export async function fetchData ():
+  Promise<RawData> {
   const rawItems = await fetch(`https://penguin-stats.io/PenguinStats/api/v2/items`).then(res => res.json())
   const rawZones = await fetch(`https://penguin-stats.io/PenguinStats/api/v2/zones`).then(res => res.json())
   const rawStages = await fetch(`https://penguin-stats.io/PenguinStats/api/v2/stages`).then(res => res.json())
@@ -78,11 +81,13 @@ async function fetchData ():
 }
 
 // loads the raw data from the Penguin Stats API and returns the processed data map.
-function loadData ({ rawItems, rawZones, rawStages, rawMatrix }):
-  { items: Map<string, Item>, zones: Map<string, Zone>, stages: Map<string, Stage>, drops: Map<string, Drop> } {
+export function loadData ({ rawItems, rawZones, rawStages, rawMatrix }: RawData):
+  Data {
   const items = _.keyBy(rawItems.map(raw => Object.freeze(new Item(raw))), 'id')
   const zones = _.keyBy(rawZones.map(raw => Object.freeze(new Zone(raw))), 'id')
   const stages = _.keyBy(rawStages.map(raw => Object.freeze(new Stage(raw, zones))), 'id')
-  const drops = _.keyBy(rawMatrix['matrix'].map(raw => Object.freeze(new Drop(raw, items, stages))), 'id')
-  return { items, zones, stages, drops }
+  const drops = _.groupBy(rawMatrix['matrix'].map(raw => Object.freeze(new Drop(raw, items, stages))), 'stage.id')
+  return {
+    items, zones, stages, drops
+  }
 }
