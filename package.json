@@ -2,11 +2,19 @@
   "name": "lineark",
   "version": "1.0.0",
   "description": "Lineark is a tool for solving linear programming problems of the game Arknights.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.31",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
 }
