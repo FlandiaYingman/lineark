@@ -74,10 +74,10 @@ export type Data = { items: Map<string, Item>, zones: Map<string, Zone>, stages:
 export async function fetchData ():
   Promise<RawData> {
   const [rawItems, rawZones, rawStages, rawMatrix] = await Promise.all([
-    fetch(`https://penguin-stats.io/PenguinStats/api/v2/items`).then(res => res.json()),
-    fetch(`https://penguin-stats.io/PenguinStats/api/v2/zones`).then(res => res.json()),
-    fetch(`https://penguin-stats.io/PenguinStats/api/v2/stages`).then(res => res.json()),
-    fetch(`https://penguin-stats.io/PenguinStats/api/v2/result/matrix`).then(res => res.json())
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/items`).then(res => res.json()),
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/zones`).then(res => res.json()),
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/stages`).then(res => res.json()),
+    fetch(`https://penguin-stats.cn/PenguinStats/api/v2/result/matrix`).then(res => res.json())
   ])
   return { rawItems, rawZones, rawStages, rawMatrix }
 }
