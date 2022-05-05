@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
-    "module": "Node12",
+    "module": "CommonJS",
     "target": "ES6",
+    "esModuleInterop": true,
     "sourceMap": true,
-    "moduleResolution": "Node",
     "lib": [
-      "es2015",
-      "es2015.promise"
+      "ES2016",
+      "ES2017",
+      "ES2018",
+      "ES2019",
+      "ES2020",
+      "ES2021"
+    ],
+    "types": [
+      "node"
     ]
-  },
-  "exclude": [
-    "node_modules"
-  ]
+  }
 }
